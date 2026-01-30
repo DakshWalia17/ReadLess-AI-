@@ -18,8 +18,8 @@ import edge_tts
 import PyPDF2
 from concurrent.futures import ThreadPoolExecutor
 NGROK_URL = "https://melanie-flourishing-donte.ngrok-free.dev"
-os.environ["GOOGLE_API_KEY"] = "AIzaSyBNx0XJiv5eNPse8N-NpVnT-ICP72--Ng8"
-GEMINI_KEY = "AIzaSyB7fqNxWR_cgbDZGxF6LvCgJaC_JLgljcw"
+os.environ["GOOGLE_API_KEY"] = ""
+GEMINI_KEY = ""
 
 app = FastAPI()
 
@@ -150,4 +150,5 @@ async def chat_with_pdf(question: str = Form(...)):
         llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
         res = llm.invoke(f"Context: {context}\nQuestion: {question}")
         return {"answer": res.content}
+
     except Exception as e: return {"answer": str(e)}
