@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+pyngrok
+python-multipart
+google-generativeai
+langchain
+langchain-google-genai
+faiss-cpu
+pypdf2
+requests
+nest_asyncio
+etts

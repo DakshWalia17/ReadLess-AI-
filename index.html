@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PaperTalk AI - Gen Z Edition</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&family=Inter&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<style>
+:root { --bg:#12081f; --pink:#C04A8C; --orange:#F39C3D; }
+body{ background:var(--bg); color:white; font-family:Inter; min-height:100vh; margin:0; }
+#bg-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:-2; opacity:0.6; }
+.overlay{ position:fixed; inset:0; background:radial-gradient(circle, transparent 0%, #12081f 80%); z-index:-1; }
+.glass{ background:rgba(255,255,255,0.04); backdrop-filter:blur(40px); border:1px solid rgba(255,255,255,0.1); border-radius:40px; padding:40px; width:600px; text-align:center; box-shadow:0 40px 120px rgba(0,0,0,0.9); }
+.glass-input { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: white; padding: 10px; border-radius: 12px; width: 100%; outline: none; }
+.glass-input option { background: #12081f; }
+.btn{ background:linear-gradient(135deg,#5A2D82,var(--pink)); padding:14px 40px; border-radius:14px; font-weight:bold; transition:0.3s; cursor: pointer; }
+.btn:hover{ transform:scale(1.05); }
+.hidden{ display:none !important; }
+@keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
+.logo-float { animation: float 5s ease-in-out infinite; }
+#podcast-img { transition: opacity 0.5s ease-in-out; opacity: 1; }
+.img-loading { opacity: 0 !important; } 
+</style>
+</head>
+
+<body>
+
+<video autoplay muted loop playsinline id="bg-video">
+  <source src="https://cdn.pixabay.com/video/2023/04/23/160105-820147926_large.mp4" type="video/mp4">
+</video>
+<div class="overlay"></div>
+
+<nav class="fixed top-0 w-full flex justify-between px-8 py-4 bg-black/40 backdrop-blur-xl z-50">
+  <h1 class="font-bold text-lg">PaperTalk AI</h1>
+  <div class="space-x-6 text-sm">
+    <button onclick="showSection('home')">Home</button>
+    <button onclick="showSection('podcast')">Podcast</button>
+    <button onclick="showSection('quiz')">Quiz</button>
+    <button onclick="showSection('chat')">Chat</button>
+  </div>
+</nav>
+
+<div id="home-section" class="flex flex-col items-center justify-center min-h-screen text-center">
+  <div class="mb-8 mt-16 logo-float"> 
+    <img src="hackaton pic.jpeg" class="h-20 mx-auto rounded-xl mb-4" onerror="this.src='https://via.placeholder.com/150'">
+    <h1 class="text-4xl font-extrabold font-[Poppins]">
+      Paper<span class="bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-orange-400">Talk</span>
+    </h1>
+    <p class="text-xs tracking-[0.4em] text-white/40 mt-2">READ LESS. LISTEN MORE.</p>
+  </div>
+
+  <div class="glass">
+    <div id="upload-ui">
+      <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+        <i data-lucide="upload-cloud" class="w-8 h-8 text-orange-400"></i>
+      </div>
+      <h2 class="text-xl font-semibold mb-2">Convert PDF to Podcast</h2>
+      <p class="text-white/40 text-sm mb-6">Select your document to begin.</p>
+      <input type="file" id="pdfFile" hidden accept=".pdf" onchange="fileSelected()">
+      <button onclick="document.getElementById('pdfFile').click()" class="btn">Select PDF</button>
+    </div>
+
+    <div id="settings-ui" class="hidden">
+        <div class="flex items-center justify-center gap-2 mb-6">
+            <i data-lucide="file-check" class="text-green-400 w-5 h-5"></i>
+            <span id="display-filename" class="text-sm font-mono text-white/80">file.pdf</span>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mb-6 text-left">
+            <div>
+                <label class="text-[10px] uppercase text-white/40 ml-1">Language</label>
+                <select id="language" class="glass-input">
+                    <option value="Hinglish">Hinglish (Best)</option>
+                    <option value="Hindi">Hindi</option>
+                    <option value="English">English</option>
+                </select>
+            </div>
+            <div>
+                <label class="text-[10px] uppercase text-white/40 ml-1">Mood</label>
+                <select id="mood" class="glass-input">
+                    <option value="Gen-Z">Gen-Z (Slang)</option>
+                    <option value="Funny">Funny</option>
+                    <option value="Strict">Strict</option>
+                </select>
+            </div>
+            <div class="col-span-2">
+                <label class="text-[10px] uppercase text-white/40 ml-1">Characters</label>
+                <select id="character" class="glass-input">
+                    <option value="Two Hosts">Two Best Friends</option>
+                    <option value="Professor & Student">Professor & Student</option>
+                </select>
+            </div>
+        </div>
+        <button onclick="startProcessing()" class="btn w-full">Generate Podcast 🚀</button>
+    </div>
+
+    <div id="loading-ui" class="hidden">
+      <div class="animate-spin w-10 h-10 border-4 border-pink-400 border-t-transparent rounded-full mx-auto mb-4"></div>
+      <p class="text-lg font-semibold">AI is Reading & Writing...</p>
+      <p class="text-xs text-white/40 mt-1">GENERATING AUDIO...</p>
+    </div>
+  </div>
+</div>
+
+<div id="podcast-section" class="hidden pt-24 px-8 max-w-4xl mx-auto pb-10">
+  <div class="flex items-center gap-4 mb-6">
+      <button onclick="showSection('home')" class="bg-white/10 p-2 rounded-full hover:bg-white/20"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
+      <h2 class="text-3xl font-bold">🎙 Podcast Episode</h2>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="glass p-6 w-full !text-left">
+          <img id="podcast-img" src="https://picsum.photos/seed/123/400/300" class="w-full h-48 object-cover rounded-xl mb-4 border border-white/10">
+          <div class="bg-black/40 p-3 rounded-xl mb-4">
+              <p class="text-xs text-white/50 uppercase tracking-widest mb-1">Now Playing</p>
+              <h3 id="current-speaker" class="font-bold text-pink-400">Host 1</h3>
+          </div>
+          <audio id="main-audio" controls class="w-full"><source src="" type="audio/mp3"></audio>
+      </div>
+      <div class="col-span-2 bg-black/20 backdrop-blur-md border border-white/10 rounded-3xl p-6 h-[500px] overflow-y-auto" id="script-container">
+         <p class="text-white/30 text-center mt-20">Script will load here...</p>
+      </div>
+  </div>
+</div>
+
+<div id="quiz-section" class="hidden pt-32 px-8 max-w-2xl mx-auto text-center">
+  <div class="glass w-full !text-left">
+      <h2 class="text-3xl font-bold mb-2">🧠 Knowledge Check</h2>
+      <p class="text-white/50 text-sm mb-6">Based on the uploaded PDF</p>
+      <p id="quiz-question" class="text-xl font-semibold mb-6">Loading...</p>
+      <div id="quiz-options" class="space-y-3"></div>
+  </div>
+</div>
+
+<div id="chat-section" class="hidden pt-24 px-8 max-w-2xl mx-auto h-screen flex flex-col pb-10">
+  <div class="glass w-full flex-1 flex flex-col !p-0 overflow-hidden">
+      <div class="p-4 border-b border-white/10 bg-white/5">
+          <h2 class="font-bold text-lg flex items-center gap-2"><i data-lucide="message-circle" class="text-pink-400"></i> Chat with PDF</h2>
+      </div>
+      <div id="chat-box" class="flex-1 overflow-y-auto p-4 space-y-4 text-left">
+          <div class="bg-white/10 p-3 rounded-xl rounded-tl-none self-start w-fit max-w-[80%]">
+              <p class="text-sm">Hi! Main AI hu. PDF se related kuch bhi poocho! 🤖</p>
+          </div>
+      </div>
+      <div class="p-4 border-t border-white/10 flex gap-2">
+          <input type="text" id="chat-input" placeholder="Ask a question..." class="glass-input flex-1 !bg-white/5" onkeypress="handleEnter(event)">
+          <button onclick="sendMessage()" class="bg-pink-500 hover:bg-pink-600 p-3 rounded-xl transition"><i data-lucide="send" class="w-5 h-5 text-white"></i></button>
+      </div>
+  </div>
+</div>
+
+<script>
+lucide.createIcons();
+
+// 👇👇👇 YAHAN APNA LINK DAAL 👇👇👇
+const API_BASE_URL = "https://melanie-flourishing-donte.ngrok-free.dev"; 
+
+let audioQueue = [];
+let currentAudioIndex = 0;
+let quizData = [];
+let currentQ = 0;
+
+/* NAVIGATION */
+function showSection(name){
+  document.getElementById("home-section").classList.add("hidden");
+  document.getElementById("podcast-section").classList.add("hidden");
+  document.getElementById("quiz-section").classList.add("hidden");
+  document.getElementById("chat-section").classList.add("hidden");
+  const activeSection = document.getElementById(name+"-section");
+  if(activeSection) activeSection.classList.remove("hidden");
+}
+
+/* FILE SELECTED */
+function fileSelected(){
+    const fileInput = document.getElementById('pdfFile');
+    if(fileInput.files.length > 0){
+        document.getElementById("display-filename").innerText = fileInput.files[0].name;
+        document.getElementById("upload-ui").classList.add("hidden");
+        document.getElementById("settings-ui").classList.remove("hidden");
+    }
+}
+
+/* START PROCESSING */
+async function startProcessing(){
+    const fileInput = document.getElementById('pdfFile');
+    if(!fileInput.files[0]) return alert("Please select a file!");
+
+    document.getElementById("settings-ui").classList.add("hidden");
+    document.getElementById("loading-ui").classList.remove("hidden");
+
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+    formData.append("language", document.getElementById("language").value);
+    formData.append("mood", document.getElementById("mood").value);
+    formData.append("character", document.getElementById("character").value);
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/process-pdf/`, {
+            method: "POST",
+            body: formData,
+            headers: { "ngrok-skip-browser-warning": "true" }
+        });
+
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            throw new Error("Backend sent HTML instead of JSON. Check URL.");
+        }
+
+        const result = await response.json();
+        
+        if(result.status === "success"){
+            setupPodcast(result.data);
+            if(result.quiz) setupQuiz(result.quiz);
+            showSection("podcast");
+        } else {
+            alert("Error: " + JSON.stringify(result));
+            location.reload();
+        }
+
+    } catch (error) {
+        console.error("Connection Failed:", error);
+        alert("Server Error: " + error.message);
+        document.getElementById("loading-ui").classList.add("hidden");
+        document.getElementById("settings-ui").classList.remove("hidden");
+    }
+}
+
+/* PODCAST SETUP */
+function setupPodcast(data){
+    const scriptBox = document.getElementById("script-container");
+    scriptBox.innerHTML = "";
+    audioQueue = [];
+
+    data.forEach((segment, index) => {
+        const div = document.createElement("div");
+        div.className = "mb-4 p-3 rounded-xl " + (index % 2 === 0 ? "bg-white/5 ml-0 mr-8" : "bg-pink-500/10 ml-8 mr-0 border border-pink-500/20");
+        div.innerHTML = `<strong class="${index % 2 === 0 ? 'text-orange-400' : 'text-pink-400'} text-xs uppercase block mb-1">${segment.speaker}</strong>
+                         <p class="text-sm opacity-90">${segment.script}</p>`;
+        scriptBox.appendChild(div);
+
+        if(segment.audio_url){
+            let fullUrl = segment.audio_url.startsWith("http") ? segment.audio_url : `${API_BASE_URL}${segment.audio_url}`;
+            audioQueue.push({ url: fullUrl, speaker: segment.speaker, image: segment.image_url });
+        }
+    });
+
+    if(audioQueue.length > 0){
+        const btn = document.createElement("button");
+        btn.innerText = "▶ Click to Start Podcast";
+        btn.className = "w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl mb-4 transition animate-pulse";
+        btn.onclick = () => { playAudio(0); btn.remove(); };
+        
+        const imgContainer = document.getElementById("podcast-img").parentNode;
+        if(imgContainer.querySelector('button')) imgContainer.querySelector('button').remove();
+        imgContainer.insertBefore(btn, imgContainer.firstChild);
+    }
+    
+    // Take Quiz Button
+    const quizBtn = document.createElement("button");
+    quizBtn.innerText = "🧠 Take Quiz based on this PDF";
+    quizBtn.className = "w-full mt-8 bg-white/10 border border-white/20 hover:bg-pink-500 hover:border-pink-500 text-white font-bold py-3 rounded-xl transition";
+    quizBtn.onclick = () => showSection('quiz'); 
+    scriptBox.appendChild(quizBtn);
+}
+
+/* ROBUST AUDIO PLAYER (Ngrok Fix) */
+async function playAudio(index){
+    if(index >= audioQueue.length) return;
+    
+    currentAudioIndex = index;
+    const item = audioQueue[index];
+    const audioPlayer = document.getElementById("main-audio");
+    const podcastImg = document.getElementById("podcast-img");
+    const speakerText = document.getElementById("current-speaker");
+
+    console.log("🎵 Fetching:", item.url);
+
+    try {
+        const res = await fetch(item.url, { headers: { "ngrok-skip-browser-warning": "true" } });
+        if(!res.ok) throw new Error("Audio download failed");
+        
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        audioPlayer.src = blobUrl;
+        audioPlayer.play();
+
+        speakerText.innerText = item.speaker;
+        speakerText.className = index % 2 === 0 ? "font-bold text-orange-400" : "font-bold text-pink-400";
+
+        if(item.image) {
+            podcastImg.classList.add("img-loading");
+            setTimeout(() => {
+                podcastImg.src = item.image;
+                podcastImg.onload = () => podcastImg.classList.remove("img-loading");
+            }, 500);
+        }
+
+        audioPlayer.onended = () => {
+            URL.revokeObjectURL(blobUrl);
+            playAudio(index + 1);
+        };
+
+    } catch (e) { console.error(e); playAudio(index+1); }
+}
+
+/* QUIZ LOGIC */
+function setupQuiz(data){
+    quizData = data;
+    currentQ = 0;
+    if(quizData && quizData.length > 0) loadQuestion();
+}
+
+function loadQuestion(){
+    if(!quizData || quizData.length === 0) return;
+    let q = quizData[currentQ];
+    let qText = q.question || q.q || "Error loading question";
+    let options = q.options || ["Yes", "No"];
+
+    const questionEl = document.getElementById("quiz-question");
+    const optDiv = document.getElementById("quiz-options");
+    if (!questionEl || !optDiv) return;
+
+    questionEl.innerText = `${currentQ + 1}. ${qText}`;
+    optDiv.innerHTML = "";
+
+    options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.innerText = opt;
+        btn.className = "block w-full text-left bg-white/5 hover:bg-pink-500 hover:text-white border border-white/10 p-4 rounded-xl mb-3 transition duration-300 font-medium";
+        btn.onclick = () => {
+            currentQ++;
+            if(currentQ < quizData.length) loadQuestion();
+            else {
+                questionEl.innerText = "🎉 Quiz Completed!";
+                optDiv.innerHTML = `<button onclick="showSection('home')" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl mt-4">Start New PDF</button>`;
+            }
+        };
+        optDiv.appendChild(btn);
+    });
+}
+
+/* CHAT LOGIC */
+function handleEnter(e) { if (e.key === 'Enter') sendMessage(); }
+
+async function sendMessage() {
+    const inputField = document.getElementById("chat-input");
+    const question = inputField.value.trim();
+    const chatBox = document.getElementById("chat-box");
+    if (!question) return;
+
+    chatBox.innerHTML += `<div class="flex justify-end"><div class="bg-pink-600 p-3 rounded-xl rounded-tr-none text-white text-sm max-w-[80%]">${question}</div></div>`;
+    inputField.value = ""; 
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    const loadingId = "loading-" + Date.now();
+    chatBox.innerHTML += `<div id="${loadingId}" class="flex justify-start"><div class="bg-white/10 p-3 rounded-xl rounded-tl-none text-white/50 text-sm animate-pulse">Thinking...</div></div>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    try {
+        const formData = new FormData();
+        formData.append("question", question);
+        const response = await fetch(`${API_BASE_URL}/chat/`, {
+            method: "POST",
+            body: formData,
+            headers: { "ngrok-skip-browser-warning": "true" }
+        });
+        const data = await response.json();
+        document.getElementById(loadingId).remove();
+        chatBox.innerHTML += `<div class="flex justify-start"><div class="bg-white/10 p-3 rounded-xl rounded-tl-none text-white text-sm max-w-[90%]"><strong class="text-orange-400 text-xs block mb-1">AI Agent</strong>${data.answer || "I don't know."}</div></div>`;
+    } catch (error) {
+        document.getElementById(loadingId).remove();
+        chatBox.innerHTML += `<p class="text-red-400 text-xs text-center mt-2">Error connecting.</p>`;
+    }
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+</script>
+
+</body>
+</html>
