@@ -18,8 +18,8 @@ import edge_tts
 import PyPDF2
 from concurrent.futures import ThreadPoolExecutor
 NGROK_URL = "https://melanie-flourishing-donte.ngrok-free.dev"
-os.environ["GOOGLE_API_KEY"] = ""
-GEMINI_KEY = ""
+os.environ["GOOGLE_API_KEY"] = "enter key here"
+GEMINI_KEY = "enter key here"
 
 app = FastAPI()
 
@@ -152,3 +152,4 @@ async def chat_with_pdf(question: str = Form(...)):
         return {"answer": res.content}
 
     except Exception as e: return {"answer": str(e)}
+
