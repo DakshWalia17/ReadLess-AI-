@@ -14,7 +14,7 @@ PaperTalk AI is a smart tool designed for students to convert boring PDFs into e
 ## 🛠️ Tech Stack
 - **Frontend:** HTML5, Tailwind CSS, JavaScript
 - **Backend:** Python, FastAPI
-- **AI Models:** Google Gemini Pro (LLM), ElevenLabs (TTS), FAISS (Vector DB)
+- **AI Models:** Google Gemini 2.5  flsash (LLM), Microsoft (ETTS), FAISS (Vector DB)
 - **Deployment:** Google Colab & Ngrok
 
 ## 🚀 How to Run
@@ -25,4 +25,5 @@ PaperTalk AI is a smart tool designed for students to convert boring PDFs into e
 5. Open `index.html` in your browser and enjoy!
 
 ---
-Made with ❤️ by Team PaperTalk
+
+Made with ❤️ by Team Binary Brains
