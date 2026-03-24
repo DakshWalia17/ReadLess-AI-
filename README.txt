@@ -24,6 +24,6 @@ PaperTalk AI is a smart tool designed for students to convert boring PDFs into e
 4. Paste the URL in `index.html` (Line 230).
 5. Open `index.html` in your browser and enjoy!
 
----
+
 
 Made with ❤️ by Team Binary Brains
